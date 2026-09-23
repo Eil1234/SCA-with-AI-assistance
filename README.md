@@ -353,8 +353,6 @@ SCA-with-AI-assistance/
 ├── 📄 SETUP.md               # 詳細設置指南
 ├── 📄 QUICKSTART.md          # 30 秒快速開始
 ├── 📄 API_SPEC.md            # API 詳細規範
-├── 📄 CONTRIBUTING.md        # 貢獻指南
-├── 📄 CODE_OF_CONDUCT.md     # 行為準則
 ├── 📄 LICENSE                # MIT 許可證
 ├── 📄 .gitignore
 │
