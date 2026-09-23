@@ -1,0 +1,134 @@
+/* ── Byte Image Popup 樣式 ────────────────────────────────────────── */
+
+.byte-image-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.byte-popup-content {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 90%;
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.byte-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+}
+
+.byte-popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.byte-popup-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.byte-popup-close:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.byte-popup-body {
+  padding: 16px;
+  overflow-y: auto;
+  max-height: calc(90vh - 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.byte-popup-body img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 4px;
+}
+
+/* ── 點擊後的 byte 樣式調整 ────────────────────────────────────────── */
+.kb {
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.kb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.kb:active {
+  transform: scale(0.98);
+}
+
+/* ── 響應式調整 ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .byte-popup-content {
+    max-width: 95%;
+    max-height: 85%;
+  }
+  
+  .byte-popup-header {
+    padding: 12px 16px;
+  }
+  
+  .byte-popup-title {
+    font-size: 14px;
+  }
+  
+  .byte-popup-body {
+    padding: 12px;
+    max-height: calc(85vh - 60px);
+  }
+}

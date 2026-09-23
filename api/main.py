@@ -13,6 +13,7 @@ API 文件：http://localhost:8000/docs
 import importlib
 import pkgutil
 import os
+import google.generativeai as genai
 import sys
 import io
 import asyncio
@@ -42,6 +43,10 @@ import attacks
 for _, module_name, _ in pkgutil.iter_modules(attacks.__path__):
     importlib.import_module(f"attacks.{module_name}")
 # ─────────────────────────────────────────────────────────────────────
+
+# 設置 GEMINI_API_KEY
+os.environ["GEMINI_API_KEY"] = "自己的GEMINI_API_KEY"
+
 
 app = FastAPI(
     title="SCA Attack API",
@@ -116,7 +121,7 @@ def _attack_process_worker(algorithm_id: str, data: AttackInput, output_queue):
             "num_traces": result.num_traces,
             "trace_length": result.trace_length,
             "plot_base64": result.plot_base64,
-            **result.extra,
+            "extra": result.extra,
         }})
     except ValueError as exc:
         output_queue.put({"status": "value_error", "message": str(exc)})
@@ -292,7 +297,6 @@ def root():
         "status": "ok",
         "message": "AES-128 / AES-256 SCA Attack API 運行中",
         "platform": "/platform",
-        \
     }
 
 
@@ -532,3 +536,206 @@ def download_report_pdf(payload: dict = Body(...)):
 def health():
     ai_status = ai_service_status()
     return {"status": "ok", "ai_attacks": {"aes_bits": 128, "ready_any": ai_status["ready_any"]}}
+
+@app.get("/ai/status", summary="查詢 AI 服務狀態")
+def get_ai_status():
+    """查詢 AI 模型服務的狀態"""
+    ai_status = ai_service_status()
+    
+    if isinstance(ai_status, dict) and "combinations" in ai_status:
+        return ai_status
+    
+    return {
+        "ready_any": ai_status.get("ready_any", False) if isinstance(ai_status, dict) else False,
+        "combinations": ai_status.get("combinations", []) if isinstance(ai_status, dict) else [],
+        "error": ai_status.get("error") if isinstance(ai_status, dict) else "AI 服務狀態讀取失敗"
+    }
+
+# ======================== 新增區域：Gemini 教導小助手 ========================
+# 使用現有的 Gemini 客戶端，複用同一個 API
+
+import google.generativeai as genai
+from pydantic import BaseModel
+from typing import Optional, List, Dict
+
+# 假設你已經有 Gemini 初始化代碼：
+# genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# model = genai.GenerativeModel("gemini-3.6-flash")
+
+class MessageItem(BaseModel):
+    role: str  # "user" 或 "model"
+    content: str
+
+class ChatRequest(BaseModel):
+    messages: List[MessageItem]
+    report_context: Optional[Dict] = None
+
+class ChatResponse(BaseModel):
+    content: str
+
+def get_gemini_model():
+    """獲取 Gemini 模型"""
+    try:
+        api_key = os.getenv("GEMINI_API_KEY")
+        print(f"DEBUG get_gemini_model: API Key 存在 = {bool(api_key)}")
+        
+        if not api_key:
+            print("ERROR: GEMINI_API_KEY 為空")
+            raise ValueError("GEMINI_API_KEY 環境變數未設置")
+        
+        print(f"DEBUG: 配置 Gemini...")
+        genai.configure(api_key=api_key)
+        
+        print(f"DEBUG: 初始化模型...")
+        model = genai.GenerativeModel("gemini-3.6-flash")
+        
+        print(f"DEBUG: 模型初始化成功")
+        return model
+    
+    except Exception as e:
+        print(f"ERROR in get_gemini_model: {type(e).__name__}: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        raise
+
+def get_tutor_system_prompt(report_context: dict = None) -> str:
+    """教導小助手的系統提示詞"""
+    base_prompt = """你是一個友善的 AI 小助手，專門幫助使用者理解旁通道攻擊分析平臺。
+
+**你的職責：**
+1. 用簡明易懂的語言解釋複雜的安全概念
+2. 提供分步驟的使用指南
+3. 回答關於平臺功能的問題
+4. 在適當時提供程式碼範例
+
+**平臺功能：**
+- 第一步：選擇分析資料來源（上傳 Trace 與 Plaintext 或使用內建資料集）
+- 第二步：配置 AES 版本和加密金鑰
+- 第三步：選擇攻擊方法和評估方式
+- 第四步：執行分析並查看結果
+
+**回應規則：**
+- 始終用繁體中文回應
+- **極度簡練**：每次回答請控制在 2 至 3 個短句以內，直接切入重點，絕對不要長篇大論。
+- **禁止冗言贅字**：不要出現「好的，我很樂意為您解答...」、「這是一個很好的問題...」等開場白或客套話。
+- 如果不確定，說明並建議查看官方文件
+- 盡量提供實用的例子"""
+    
+    # 如果有報告上下文，加入相關背景
+    if report_context:
+        context_info = f"""
+
+**用戶當前的分析背景：**
+- 攻擊類型：{report_context.get('attack_type', 'N/A')}
+- 資料集：{report_context.get('dataset', 'N/A')}
+- AES 版本：{report_context.get('aes_version', 'N/A')}
+- 金鑰恢復狀態：{report_context.get('key_recovered', 'N/A')}
+- SNR 值：{report_context.get('snr', 'N/A')}
+
+請結合上述背景，用最精簡的語句回答使用者的問題，幫助其理解分析結果和安全含義。"""
+        return base_prompt + context_info
+    
+    return base_prompt
+
+@app.post("/api/ai/chat", response_model=ChatResponse)
+async def ai_chat(request: ChatRequest):
+    """Gemini 教導小助手端點"""
+    try:
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY 環境變數未設置")
+        
+        genai.configure(api_key=api_key)
+        
+        # 1. 取得系統提示詞
+        system_instruction = get_tutor_system_prompt(request.report_context)
+        
+        # 2. 初始化模型時帶入 system_instruction（這能確保 AI 嚴格遵守規則且不囉嗦）
+        model = genai.GenerativeModel(
+            model_name="gemini-3.6-flash",
+            system_instruction=system_instruction
+        )
+        
+        # 3. 轉換歷史對話格式（確保只有正確的 role 輪替與過濾髒資料）
+        messages = []
+        for msg in request.messages:
+            content = msg.content.strip()
+            
+            # 【新增防護】如果內容包含提示詞殘留或亂碼，直接跳過不送給 AI
+            if "sentences max" in content or "Sentence" in content or "max_output_tokens" in content:
+                continue
+                
+            # 確保 role 符合 Gemini 的預期 ("user" 或 "model")
+            role = "user" if msg.role == "user" else "model"
+            messages.append({
+                "role": role,
+                "parts": [{"text": content}]
+            })
+        
+        # 安全防護：如果前端沒有傳入歷史訊息，給一個預設的招呼或提示
+        if not messages:
+            messages = [{"role": "user", "parts": [{"text": "你好，請簡短介紹我能怎麼使用這個平台。"}]}]
+
+        # 4. 調用 Gemini（不再把 system_instruction 當作 user message 塞進去）
+        response = model.generate_content(
+            messages,
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=512,  # 限制最大輸出長度，防止它長篇大論
+                temperature=0.3         # 降低溫度，讓回答更精準、嚴謹、不發散
+            )
+        )
+        
+        return ChatResponse(content=response.text)
+    
+    except Exception as e:
+        error_msg = f"{type(e).__name__}: {str(e)}"
+        print(f"\n❌ ERROR in ai_chat: {error_msg}")
+        raise HTTPException(status_code=500, detail=error_msg)
+
+@app.post("/api/ai/chat-with-context", response_model=ChatResponse)
+
+
+@app.get("/api/ai/health")
+async def ai_health():
+    """
+    檢查 Gemini AI 服務健康狀態
+    """
+    api_key = os.getenv("GEMINI_API_KEY")
+    
+    return {
+        "status": "healthy" if api_key else "unconfigured",
+        "api_configured": bool(api_key),
+        "service": "gemini",
+        "model": "gemini-3.6-flash"
+    }
+
+# ============================================================================
+# 靜態文件和平臺頁面配置
+# ============================================================================
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+
+# 配置靜態文件路由
+static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+# 提供 platform.html
+@app.get("/platform")
+async def get_platform():
+    """返回 platform.html 頁面"""
+    try:
+        platform_path = os.path.join(os.path.dirname(__file__), "..", "platform.html")
+        with open(platform_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="platform.html 檔案未找到")
+
+# ============================================================================
+# 啟動伺服器
+# ============================================================================
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

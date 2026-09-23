@@ -1,6 +1,6 @@
 """
 attacks/cpa.py
-CPA（相關電力分析）攻擊模組。
+CPA（相關電力分析）攻擊模組 — 改進版，包含 byte 獨立圖表。
 自動登錄到 registry，API 啟動時即可使用。
 """
 
@@ -78,7 +78,7 @@ class CPAAttack(BaseAttack):
 
         guess_key = [int(np.argmax(np.max(np.abs(r[b]), axis=1))) for b in range(16)]
 
-        # 畫圖
+        # ── 畫總圖（用於報告）────────────────────────────────────────
         fig, axes = plt.subplots(4, 4, figsize=(24, 24))
         for b in range(16):
             ax = axes[b // 4, b % 4]
@@ -96,6 +96,9 @@ class CPAAttack(BaseAttack):
             num_traces   = num_traces,
             trace_length = trace_length,
             plot_base64  = self.plot_to_base64(fig),
+            extra        = {
+                "plots_by_byte": self.generate_byte_plots(r, byte_count=16)
+            }
         )
 
 

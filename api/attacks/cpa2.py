@@ -1,6 +1,6 @@
 """
-attacks/cpa.py
-CPA（相關電力分析）攻擊模組 — AES-256 完整版。
+attacks/cpa2.py
+CPA（相關電力分析）攻擊模組 — AES-256 完整版 — 改進版，包含 byte 獨立圖表。
 
 兩階段攻擊：
   Phase 1：SubBytes(pt[b] XOR key_guess)              → 回復 key[0:15]
@@ -93,7 +93,7 @@ class CPAAttack(BaseAttack):
 
         full_key = key1.tolist() + key2.tolist()
 
-        # ── 畫圖 ─────────────────────────────────────────────────
+        # ── 畫總圖（用於報告）────────────────────────────────────────
         fig, axes = plt.subplots(4, 8, figsize=(32, 16))
         for b in range(16):
             axes[b // 4, b % 4].set_title(f"P1 Byte{b}", fontsize=8)
@@ -115,6 +115,10 @@ class CPAAttack(BaseAttack):
             extra        = {
                 "phase1_key": bytes(key1).hex(),
                 "phase2_key": bytes(key2).hex(),
+                "plots_by_byte": (
+                    self.generate_byte_plots(r1, byte_count=16, offset=0) +
+                    self.generate_byte_plots(r2, byte_count=16, offset=16)
+                )
             },
         )
 

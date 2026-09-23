@@ -1,6 +1,6 @@
 """
 attacks/dpa_dom.py
-DPA — Difference of Means（LSB 分組）攻擊模組。
+DPA — Difference of Means（LSB 分組）攻擊模組 — 改進版，包含 byte 獨立圖表。
 """
 
 import numpy as np
@@ -65,7 +65,7 @@ class DPADoMAttack(BaseAttack):
                            - sum_0[b, valid] / n_0[b, valid, None])
             Guess_Key[b] = int(np.argmax(np.max(np.abs(r[b]), axis=1)))
 
-        # 畫圖
+        # ── 畫總圖（用於報告）────────────────────────────────────────
         fig, axes = plt.subplots(4, 4, figsize=(24, 24))
         for b in range(16):
             ax = axes[b // 4, b % 4]
@@ -82,6 +82,9 @@ class DPADoMAttack(BaseAttack):
             num_traces   = num_traces,
             trace_length = trace_length,
             plot_base64  = self.plot_to_base64(fig),
+            extra        = {
+                "plots_by_byte": self.generate_byte_plots(r, byte_count=16)
+            }
         )
 
 

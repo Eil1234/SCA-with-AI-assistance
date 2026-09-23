@@ -97,6 +97,32 @@ class BaseAttack(ABC):
         buf.seek(0)
         return base64.b64encode(buf.read()).decode("utf-8")
 
+    def generate_byte_plots(self, correlations: np.ndarray, byte_count: int = 16, offset: int = 0) -> list:
+        """
+        為每個 byte 生成獨立的相關係數圖。
+
+        Args:
+            correlations: shape (byte_count, 256, trace_length) 或 (16, 256, trace_length)
+            byte_count: 要生成圖表的 byte 數量（16 或 32）
+            offset: byte 編號偏移（用於 AES-256 Phase 2，offset=16）
+
+        Returns:
+            list of {"byte_index": int, "plot_base64": str}
+        """
+        plots = []
+        for b in range(byte_count):
+            fig, ax = plt.subplots(figsize=(10, 4))
+            ax.set_title(f"Byte {b + offset}")
+            ax.set_xlabel("Samples")
+            ax.set_ylabel("Correlation")
+            ax.plot(correlations[b].T, alpha=0.3, linewidth=0.5)
+            ax.grid(True, alpha=0.3)
+            plots.append({
+                "byte_index": b + offset,
+                "plot_base64": self.plot_to_base64(fig)
+            })
+        return plots
+
 
 # ─────────────────────────────────────────────
 # 演算法登錄機制（Registry）

@@ -17,9 +17,8 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:36px 36px;opacity:.45;pointer-events:none;z-index:0}
-.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:28px 24px 72px}
-
+/*body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:36px 36px;opacity:.45;pointer-events:none;z-index:0} */
+.wrap{max-width:1100px; margin:0 auto; padding:28px 24px 72px}
 /* Header */
 header{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid var(--border)}
 .logo{display:flex;align-items:center;gap:12px}
@@ -308,6 +307,17 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .r-plot img{width:100%;display:block}
 .r-advice{margin-top:14px;padding:12px 14px;background:var(--eval-bg);border:1px solid var(--eval-border);border-radius:8px;font-size:13px;color:var(--eval-text);line-height:1.8}
 
+/* ── Byte 選中樣式 ────────────────────────────────────────── */
+.kb.byte-selected {
+  background-color: #356ae6 !important;
+  color: white !important;
+  border-color: #356ae6 !important;
+}
+
+.kb.byte-selected:hover {
+  background-color: #2c5cc4 !important;
+}
+
 /* Error */
 .err-box{display:none;padding:12px 14px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:8px;font-size:13px;color:var(--warn-text);font-family:'IBM Plex Mono',monospace;line-height:1.6}
 .err-box.vis{display:block}
@@ -358,6 +368,141 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 .wait-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:11px}.wait-metric{font-size:10px;color:var(--muted)}.wait-metric strong{display:block;margin-top:3px;font:600 12px 'IBM Plex Mono',monospace;color:var(--text)}.wait-note{margin-top:9px;font-size:10px;line-height:1.55;color:#7b879b}
 @keyframes waitShine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 @media(max-width:760px){.upload-row{grid-template-columns:1fr}.upload-area{min-height:220px}.guide-grid{grid-template-columns:1fr}.guide-head{display:block}.guide-badges{justify-content:flex-start;margin-top:8px}.wait-metrics{grid-template-columns:1fr}.wait-metric{display:flex;justify-content:space-between}.wait-metric strong{margin:0}}
+
+/* ── Byte Image Popup 樣式 ────────────────────────────────────────── */
+
+.byte-image-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.byte-popup-content {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 90%;
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.byte-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+}
+
+.byte-popup-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.byte-popup-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.byte-popup-close:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.byte-popup-body {
+  padding: 16px;
+  overflow-y: auto;
+  max-height: calc(90vh - 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.byte-popup-body img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 4px;
+}
+
+/* ── 點擊後的 byte 樣式調整 ────────────────────────────────────────── */
+.kb {
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.kb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.kb:active {
+  transform: scale(0.98);
+}
+
+/* ── 響應式調整 ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .byte-popup-content {
+    max-width: 95%;
+    max-height: 85%;
+  }
+  
+  .byte-popup-header {
+    padding: 12px 16px;
+  }
+  
+  .byte-popup-title {
+    font-size: 14px;
+  }
+  
+  .byte-popup-body {
+    padding: 12px;
+    max-height: calc(85vh - 60px);
+  }
+}
 </style>
 </head>
 
@@ -417,37 +562,37 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
 
         <div id="source-test"></div>
         <div class="source-intro">
-          <h2>�o���n���R���@�ظ�ơH</h2>
-          <p>����ܸ�ƨӷ��A�U�@�B�u�|��ܯ����ڰ��檺������k�C</p>
+          <h2>�o���n���R���@�ظ�ơH</h2>
+          <p>����ܸ�ƨӷ��A�U�@�B�u�|��ܯ����ڰ��檺������k�C</p>
         </div>
         <div class="source-grid">
           <div class="source-option">
             <input type="radio" name="data-source" id="source-upload" value="upload" onchange="setDataSource('upload')">
             <label class="source-card" for="source-upload">
-              <div class="source-icon">��</div>
-              <div class="source-copy"><div class="source-title">�W�Ǧۤv���q�����</div><div class="source-desc">�W�� Trace �P Plaintext�A�ϥ� CPA�BDPA�BMIA�BTemplate �� SNR ���ǲΤ��R�C</div><span class="source-tag">�䴩 AES-128 / AES-256</span></div>
+              <div class="source-icon">��</div>
+              <div class="source-copy"><div class="source-title">�W�Ǧۤv���q�����</div><div class="source-desc">�W�� Trace �P Plaintext�A�ϥ� CPA�BDPA�BMIA�BTemplate �� SNR ���ǲΤ��R�C</div><span class="source-tag">�䴩 AES-128 / AES-256</span></div>
               <div class="source-check">?</div>
             </label>
           </div>
           <div class="source-option">
             <input type="radio" name="data-source" id="source-builtin" value="builtin" onchange="setDataSource('builtin')">
             <label class="source-card" for="source-builtin">
-              <div class="source-icon">��</div>
-              <div class="source-copy"><div class="source-title">�ϥΤ��� AI �оǸ�ƶ�</div><div class="source-desc">�����W���ɮסA��ܦ��A���W�� ASCAD��CHES ��ƶ��A�A�ϥιw�V�m CNN �� MLP�C</div><span class="source-tag">�Ȥ䴩 AES-128 ��@ byte</span></div>
+              <div class="source-icon">��</div>
+              <div class="source-copy"><div class="source-title">�ϥΤ��� AI �оǸ�ƶ�</div><div class="source-desc">�����W���ɮסA��ܦ��A���W�� ASCAD��CHES ��ƶ��A�A�ϥιw�V�m CNN �� MLP�C</div><span class="source-tag">�Ȥ䴩 AES-128 ��@ byte</span></div>
               <div class="source-check">?</div>
             </label>
           </div>
         </div>
         <div class="source-content" id="builtin-source-content">
           <div class="builtin-dataset-box">
-            <div class="builtin-head">��� AI �оǸ�ƶ�</div>
-            <div class="builtin-note">�U�@�B�|�̳o�̿�ܪ���ƶ��A�u��ܥi�f�t�� AES-128 AI �����C</div>
+            <div class="builtin-head">��� AI �оǸ�ƶ�</div>
+            <div class="builtin-note">�U�@�B�|�̳o�̿�ܪ���ƶ��A�u��ܥi�f�t�� AES-128 AI �����C</div>
             <div class="dataset-grid">
-              <div class="dataset-option"><input type="radio" name="builtin-dataset" id="dataset-fixed" value="fixed" onchange="setBuiltinDataset('fixed')"><label class="dataset-card" for="dataset-fixed"><strong>ASCAD Fixed</strong><span>�T�w���_��ƶ�</span></label></div>
-              <div class="dataset-option"><input type="radio" name="builtin-dataset" id="dataset-rand" value="rand" onchange="setBuiltinDataset('rand')"><label class="dataset-card" for="dataset-rand"><strong>ASCAD Random</strong><span>�H�����_��ƶ�</span></label></div>
-              <div class="dataset-option"><input type="radio" name="builtin-dataset" id="dataset-ches" value="ches" onchange="setBuiltinDataset('ches')"><label class="dataset-card" for="dataset-ches"><strong>CHES CTF</strong><span>���}�v�ɸ�ƶ�</span></label></div>
+              <div class="dataset-option"><input type="radio" name="builtin-dataset" id="dataset-fixed" value="fixed" onchange="setBuiltinDataset('fixed')"><label class="dataset-card" for="dataset-fixed"><strong>ASCAD Fixed</strong><span>�T�w���_��ƶ�</span></label></div>
+              <div class="dataset-option"><input type="radio" name="builtin-dataset" id="dataset-rand" value="rand" onchange="setBuiltinDataset('rand')"><label class="dataset-card" for="dataset-rand"><strong>ASCAD Random</strong><span>�H�����_��ƶ�</span></label></div>
+              <div class="dataset-option"><input type="radio" name="builtin-dataset" id="dataset-ches" value="ches" onchange="setBuiltinDataset('ches')"><label class="dataset-card" for="dataset-ches"><strong>CHES CTF</strong><span>���}�v�ɸ�ƶ�</span></label></div>
             </div>
-            <div class="source-route-note">AI �����|����Ū�����A��������ƶ��P�w�V�m�ҫ��A���|���R�A�b�s��������� Trace�C</div>
+            <div class="source-route-note">AI �����|����Ū�����A��������ƶ��P�w�V�m�ҫ��A���|���R�A�b�s��������� Trace�C</div>
           </div>
         </div>
         <div class="source-content" id="upload-source-content">
@@ -750,6 +895,18 @@ header{display:flex;align-items:center;justify-content:space-between;margin-bott
         <div id="r-out" style="display:none;border-top:1px solid var(--border);padding-top:16px">
           <div class="r-lbl">金鑰恢復結果／分析狀態</div>
           <div class="key-bytes-row" id="r-key-bytes"></div>
+
+          <!-- ─ 新增：圖片顯示區塊 ─ -->
+          <div id="byte-plot-container" style="margin-top: 20px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; text-align: center; min-height: 300px; display: flex; align-items: center; justify-content: center;">
+            <div id="byte-plot-hint" style="color: #999; font-size: 14px;">
+              💡 點擊上方的金鑰 byte 可以在此顯示對應的相關係數圖表
+            </div>
+            <div id="byte-plot-content" style="display: none;">
+              <div id="byte-plot-title" style="font-weight: bold; margin-bottom: 10px; color: #333;"></div>
+              <img id="byte-plot-img" src="" alt="Byte Plot" style="max-width: 100%; max-height: 500px; border-radius: 4px;" />
+            </div>
+          </div>
+
           <div class="score-bar" id="r-score-bar"></div>
           <!-- keep r-key hidden for copy convenience -->
           <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.06em" id="r-key"></div>
@@ -1049,7 +1206,7 @@ function updateAIConfig(){renderAIStatus();updatePipeUI();}
 // ── Step nav ──────────────────────────────────────────────────────────────────
 function goStep(n) {
   if (n===2 && (!preDone || !selectedAesBits)) return;
-  if (n===3) return;
+  
   ['sec-1','sec-2','sec-3'].forEach((id,i)=>{ document.getElementById(id).style.display=(i+1===n)?'block':'none'; });
   [1,2,3].forEach(i=>{
     document.getElementById('tab-'+i).className='step-tab'+(i===n?' active':i<n?' done':'');
@@ -1328,12 +1485,34 @@ function showResult(data, atkItems, elapsed) {
     ? `AES-128 Byte ${aiByteIndex} 猜測：${keyHex||'—'}；資料集正確值：${backendAIKey===null?'未提供':data.correct_key_byte_hex.toUpperCase()}；最終 rank：${data.final_correct_key_rank??'—'}`
     : (keyHex||(data.note||'此分析不回復金鑰'));
 
+  // ── 處理傳統攻擊的 byte plots（從 extra.plots_by_byte 取得）──────────
+  const plotsByByte = !isAI && data.extra && data.extra.plots_by_byte ? data.extra.plots_by_byte : [];
+  console.log('plotsByByte:', plotsByByte);  // ← 加這一行
+  console.log('isAI:', isAI);                 // ← 加這一行
+  console.log('data.extra:', data.extra);     // ← 加這一行
+
   const kbRow=document.getElementById('r-key-bytes');kbRow.innerHTML='';
   byteArr.forEach((hex,i)=>{
     const d=document.createElement('div');d.className='kb';d.textContent=hex;
     if(comparable){const expected=isAI?expectedAIByte:knownKey[i];d.classList.add(parseInt(hex,16)===expected?'correct':'wrong');}
     else d.classList.add('found');
     if(isAI)d.title=`AES-128 Byte ${aiByteIndex}`;
+    
+    // ── 為傳統攻擊的 byte 加上點擊事件 ────────────────────────
+    if(!isAI && plotsByByte.length > 0){
+      d.style.cursor='pointer';
+      
+      // 查找該 byte 對應的 plot
+      const plotData = plotsByByte.find(p => p.byte_index === i);
+      
+      if(plotData && plotData.plot_base64){
+        d.addEventListener('click', (e) => {
+          e.stopPropagation();
+          displayByteImageInContainer(hex, i, plotData.plot_base64, d);
+        });
+      }
+    }
+    
     kbRow.appendChild(d);
   });
 
@@ -1366,7 +1545,8 @@ function showResult(data, atkItems, elapsed) {
     : (accuracy!==null?'已知金鑰比對準確率：'+accuracy+'%':(isKeyResult?'未提供相同長度的已知金鑰，無法計算準確率':'SNR 洩漏點分析完成'));
 
   const plot=document.getElementById('r-plot');
-  if(data.plot_base64){document.getElementById('r-img').src='data:image/png;base64,'+data.plot_base64;plot.style.display='block';}
+  // AI 模式顯示總圖，傳統攻擊不顯示（圖表已嵌入 byte 上）
+  if(isAI && data.plot_base64){document.getElementById('r-img').src='data:image/png;base64,'+data.plot_base64;plot.style.display='block';}
   else plot.style.display='none';
 
   const hasTemplate=atkItems.some(a=>isTemplateId(a.id));
@@ -1404,6 +1584,71 @@ function showResult(data, atkItems, elapsed) {
   document.getElementById('report-generate-btn').disabled=false;document.getElementById('report-download-btn').disabled=true;
   document.getElementById('r-out').style.display='block';generateAiReport();
 }
+/***
+// ── 點擊 byte 展開/收起圖表的浮動視窗 ────────────────────────────────────
+function toggleByteImagePopup(hexValue, byteIndex, plotBase64){
+  const existingPopup = document.getElementById(`byte-popup-${byteIndex}`);
+  
+  if(existingPopup){
+    // 已存在則移除（收起）
+    existingPopup.remove();
+    return;
+  }
+  
+  // 先關閉其他已開啟的 popup
+  document.querySelectorAll('[id^="byte-popup-"]').forEach(p => p.remove());
+  
+  // 建立新 popup
+  const popup = document.createElement('div');
+  popup.id = `byte-popup-${byteIndex}`;
+  popup.className = 'byte-image-popup';
+  popup.innerHTML = `
+    <div class="byte-popup-content">
+      <div class="byte-popup-header">
+        <span class="byte-popup-title">Byte ${byteIndex} (${hexValue})</span>
+        <button class="byte-popup-close" onclick="document.getElementById('byte-popup-${byteIndex}').remove()">✕</button>
+      </div>
+      <div class="byte-popup-body">
+        <img src="data:image/png;base64,${plotBase64}" alt="Byte ${byteIndex} Plot" />
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(popup);
+  popup.style.display = 'block';
+  
+  // 點擊背景關閉
+  popup.addEventListener('click', (e) => {
+    if(e.target === popup){
+      popup.remove();
+    }
+  });
+}
+ ***/
+
+// ── 在容器中顯示 byte 圖片 ────────────────────────────────────
+function displayByteImageInContainer(hexValue, byteIndex, plotBase64, byteElement){
+  // 移除其他 byte 的 active 樣式
+  document.querySelectorAll('.kb').forEach(kb => {
+    kb.classList.remove('byte-selected');
+  });
+  
+  // 給點擊的 byte 加上 active 樣式
+  byteElement.classList.add('byte-selected');
+  
+  // 隱藏提示訊息，顯示圖片
+  const hint = document.getElementById('byte-plot-hint');
+  const content = document.getElementById('byte-plot-content');
+  const title = document.getElementById('byte-plot-title');
+  const img = document.getElementById('byte-plot-img');
+  
+  if(hint) hint.style.display = 'none';
+  if(content) content.style.display = 'block';
+  if(title) title.textContent = `Byte ${byteIndex} (${hexValue})`;
+  if(img) img.src = `data:image/png;base64,${plotBase64}`;
+}
+
+
 
 // ── AI security report ───────────────────────────────────────────────────────
 function reportEsc(value){
@@ -1669,6 +1914,17 @@ runPipeline=async function(){
 refreshAttackCards();
 checkApi();
 setInterval(checkApi, 8081);
+</script>
+
+<!-- Gemini 教導小助手 -->
+<script src="/static/ai-tutor.js"></script>
+<script>
+  AITutor.init({
+    apiEndpoint: '/api/ai/chat',
+    platformName: '旁通道攻擊分析平臺',
+    language: 'zh-TW'
+  });
+
 </script>
 </body>
 </html>

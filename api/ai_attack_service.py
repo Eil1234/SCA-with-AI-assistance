@@ -227,14 +227,25 @@ def run_ai_evaluation(model_type: str, leakage_model: str, dataset_type: str) ->
     intermediates = AES_Sbox[plaintext_byte[:, None] ^ guesses[None, :]]
     classes = intermediates if leakage_model == "id" else hw_table[intermediates]
     log_predictions = np.log(np.clip(predictions, 1e-12, 1.0))
+
+    # --- 10 次隨機打亂並計算平均 GE (補齊 guess_history 初始化) ---
+    nb_attacks = 10
+    total_traces = raw.shape[0]
+    all_ranks = np.empty((nb_attacks, total_traces), dtype=np.float64)
+    guess_history = np.empty(total_traces, dtype=np.uint8)
     cumulative = np.zeros(256, dtype=np.float64)
-    ranks = np.empty(raw.shape[0], dtype=np.int32)
-    guess_history = np.empty(raw.shape[0], dtype=np.uint8)
-    for index in range(raw.shape[0]):
-        cumulative += log_predictions[index, classes[index]]
-        order = np.argsort(cumulative)[::-1]
-        ranks[index] = int(np.flatnonzero(order == target_key)[0])
-        guess_history[index] = np.uint8(order[0])
+
+    for attack_idx in range(nb_attacks):
+        perm = np.random.permutation(total_traces)
+        cumulative = np.zeros(256, dtype=np.float64)
+        for index, trace_idx in enumerate(perm):
+            cumulative += log_predictions[trace_idx, classes[trace_idx]]
+            order = np.argsort(cumulative)[::-1]
+            all_ranks[attack_idx, index] = np.flatnonzero(order == target_key)[0]
+            if attack_idx == nb_attacks - 1:
+                guess_history[index] = np.uint8(order[0])
+
+    ranks = np.mean(all_ranks, axis=0)
 
     leakage = hw_table[AES_Sbox[plaintext_byte ^ np.uint8(target_key)]].astype(np.float64)
     centered_leakage = leakage - leakage.mean()
@@ -261,7 +272,7 @@ def run_ai_evaluation(model_type: str, leakage_model: str, dataset_type: str) ->
     fig.tight_layout()
 
     guessed_key = int(np.argmax(cumulative))
-    zero_positions = np.flatnonzero(ranks == 0)
+    zero_positions = np.flatnonzero(ranks < 1.0)
     top_order = np.argsort(cumulative)[::-1][:5]
     return {
         "algorithm": f"ai_{model_type}",

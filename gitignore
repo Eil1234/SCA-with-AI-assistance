@@ -1,0 +1,111 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter
+.ipynb_checkpoints
+
+# Testing
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# FastAPI
+.fastapi/
+
+# TensorFlow & AI Models
+*.h5
+*.pb
+*.ckpt
+*.pth
+*.pkl
+*.pickle
+*.joblib
+.tensorflow/
+
+# Large data files
+*.csv
+data/*.npy
+data/*.npz
+trace_data/
+ai_assets/data/
+ai_assets/models/
+
+# Environment & API Keys
+.env
+.env.local
+.env.*.local
+api/.env
+api/.env.local
+
+# Logs
+logs/
+*.log
+
+# Output & Temporary
+api/output/
+api/templates/*.npz
+temp/
+reports/
+*.tmp
+
+# OS
+Thumbs.db
+ehthumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+.directory
+
+# Project specific
+node_modules/
+package-lock.json
+platform_popupver.html  # 舊版本，不上傳
+folder_structure.txt    # 臨時生成文件
