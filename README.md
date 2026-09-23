@@ -485,42 +485,12 @@ taskkill /PID <PID> /F
 - **[SETUP.md](SETUP.md)** - Windows/macOS/Linux 完整設置指南
 - **[QUICKSTART.md](QUICKSTART.md)** - 30 秒快速上手
 - **[API_SPEC.md](API_SPEC.md)** - 完整 API 規範
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - 如何貢獻代碼
-
----
-
-## 🤝 貢獻
-
-歡迎提交 Issue 和 Pull Request！請參考 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ---
 
 ## 📜 許可證
 
 本專案採用 [MIT 許可證](LICENSE)。
-
----
-
-## 📧 聯繫方式
-
-**開發者**：Eileen  
-**學校**：逢甲大學 資訊工程學系  
-**項目類型**：畢業專題  
-**GitHub**：[@Eil1234](https://github.com/Eil1234)  
-**Email**：[你的郵箱]（可選）
-
----
-
-## 🙏 致謝
-
-感謝以下開源項目：
-
-- [FastAPI](https://fastapi.tiangolo.com/) - 現代化 Web 框架
-- [TensorFlow](https://www.tensorflow.org/) - 深度學習框架
-- [Google Generative AI](https://ai.google.dev/) - Gemini AI API
-- [ChipWhisperer](https://github.com/newaetech/chipwhisperer) - 旁路分析研究平台
-
-以及感謝朋友分享的原始 SCA 項目框架。
 
 ---
 
