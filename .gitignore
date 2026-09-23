@@ -107,5 +107,7 @@ ehthumbs.db
 # Project specific
 node_modules/
 package-lock.json
-platform_popupver.html  # 舊版本，不上傳
-folder_structure.txt    # 臨時生成文件
+
+# AI datasets and trained models
+api/ai_assets/data/*.h5
+api/ai_assets/models/*.h5
